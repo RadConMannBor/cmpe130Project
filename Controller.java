@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.util.*;
 
 public class Controller {
@@ -86,22 +87,17 @@ public class Controller {
             3, 3, 1, 5, 3, 5, 4, 2, 5, 3, 2};
 
 
-//    private String[] degreeListSorted;
+    //    private String[] degreeListSorted;
     private int[] salaryListSorted;
     private int[] qualityListSorted;
     private int[] teamworkListSorted;
-
-
-    private Hashtable<String, String> mapDegree = new Hashtable<>();
-    private Hashtable<String, Integer> mapSalary = new Hashtable<>();
-    private Hashtable<String, Integer> mapQuality = new Hashtable<>();
-    private Hashtable<String, Integer> mapTeamwork = new Hashtable<>();
-
 
     private Hashtable<String, List<String>> mapDegreeKey = new Hashtable<>();
     private Hashtable<Integer, List<String>> mapSalaryKey = new Hashtable<>();
     private Hashtable<Integer, List<String>> mapQualityKey = new Hashtable<>();
     private Hashtable<Integer, List<String>> mapTeamworkKey = new Hashtable<>();
+
+    private Hashtable<String, String> mapEmployeeTraits = new Hashtable<>();
 
     private List<String> qualityMapList = null;
     private List<String> salaryMapList = null;
@@ -141,16 +137,11 @@ public class Controller {
     }
 
     private void initiateMaps(){
-        mapSalary = new Hashtable<>();
-        mapQuality = new Hashtable<>();
-        mapTeamwork = new Hashtable<>();
-        mapDegree = new Hashtable<>();
-
         for(int i = 0; i < employeeList.length; i++){
-            mapQuality.put(employeeList[i], qualityList[i]);
-            mapSalary.put(employeeList[i], salaryList[i]);
-            mapTeamwork.put(employeeList[i], teamworkList[i]);
-            mapDegree.put(employeeList[i], degreeList[i]);
+
+            String traits = degreeList[i] + ":" + qualityList[i] + ":" + salaryList[i] + ":" + teamworkList[i];
+
+            mapEmployeeTraits.put(traits, employeeList[i]);
 
 
             if (mapQualityKey.containsKey(qualityList[i])) {
@@ -188,10 +179,7 @@ public class Controller {
                 degreeMapList.add(employeeList[i]);
                 mapDegreeKey.put(degreeList[i], degreeMapList);
             }
-
         }
-
-
     }
 
     public Controller() {
@@ -227,13 +215,16 @@ public class Controller {
         }
     }
 
-    public void printSortedHash(String s){
-        List<String> nameList = Arrays.asList(employeeList);
-        List<String> degList = Arrays.asList(degreeList);
-        List<int[]> salList = Arrays.asList(salaryList);
-        List<int[]> qualList = Arrays.asList(qualityList);
-        List<int[]> teamList = Arrays.asList(teamworkList);
+    public String findMatch(String degree, int quality, int salary, int teamwork){
+        String match = "No Specific Match Found";
 
+        String traitMatch = degree + ":" + quality + ":" + salary + ":" + teamwork;
+
+        if (mapEmployeeTraits.get(traitMatch) != null) {
+            match = mapEmployeeTraits.get(traitMatch);
+        }
+
+        return match;
     }
 
     private static int[] merge(int[] a, int[] b) {
@@ -246,6 +237,39 @@ public class Controller {
             else                    c[k] = b[j++];
         }
         return c;
+    }
+
+    public static void mergeSortString(String[] names) {
+        if (names.length >= 2) {
+            String[] left = new String[names.length / 2];
+            String[] right = new String[names.length - names.length / 2];
+
+            for (int i = 0; i < left.length; i++) {
+                left[i] = names[i];
+            }
+
+            for (int i = 0; i < right.length; i++) {
+                right[i] = names[i + names.length / 2];
+            }
+
+            mergeSortString(left);
+            mergeSortString(right);
+            mergeSTR(names, left, right);
+        }
+    }
+
+    public static void mergeSTR(String[] names, String[] left, String[] right) {
+        int a = 0;
+        int b = 0;
+        for (int i = 0; i < names.length; i++) {
+            if (b >= right.length || (a < left.length && left[a].compareToIgnoreCase(right[b]) < 0)) {
+                names[i] = left[a];
+                a++;
+            } else {
+                names[i] = right[b];
+                b++;
+            }
+        }
     }
 
     public static int[] mergesort(int[] input) {
@@ -274,53 +298,52 @@ public class Controller {
         qualityListSorted = mergesort(qualityList);
     }
 
-    public String find(Object array, int type, Object search){
+    public String find(int type, Object search){
         switch(type){
             case 1:
-                    if (null != search && mapDegreeKey.containsKey(search)) {
-                        String degreeVal = "Degree\n";
-                        for (String emp : mapDegreeKey.get(search)) {
-                            degreeVal += emp + "\n";
-                        }
-                        System.out.println(degreeVal);
-                        return degreeVal;
+                if (null != search && mapDegreeKey.containsKey(search)) {
+                    String degreeVal = "\n";
+                    for (String emp : mapDegreeKey.get(search)) {
+                        degreeVal += emp + "\n";
                     }
-                    break;
-
+                    System.out.println(degreeVal);
+                    return degreeVal;
+                }
+                break;
             case 2:
-                    if (null != search && mapQualityKey.containsKey(search)) {
-                        String qualityVal = "Quality\n";
-                        for (String emp : mapQualityKey.get(search)) {
-                            qualityVal += emp + "\n";
-                        }
-                        System.out.println(qualityVal);
-                        return qualityVal;
+                if (null != search && mapQualityKey.containsKey(search)) {
+                    String qualityVal = "\n";
+                    for (String emp : mapQualityKey.get(search)) {
+                        qualityVal += emp + "\n";
                     }
-                    break;
+                    System.out.println(qualityVal);
+                    return qualityVal;
+                }
+                break;
             case 3:
-                    if (null != search && mapSalaryKey.containsKey(search)) {
-                        String salaryVal = "Salary\n";
-                        for (String emp : mapSalaryKey.get(search)) {
-                            salaryVal += emp + "\n";
-                        }
-                        System.out.println(salaryVal);
-                        return salaryVal;
+                if (null != search && mapSalaryKey.containsKey(search)) {
+                    String salaryVal = "\n";
+                    for (String emp : mapSalaryKey.get(search)) {
+                        salaryVal += emp + "\n";
                     }
-                    break;
+                    System.out.println(salaryVal);
+                    return salaryVal;
+                }
+                break;
             case 4:
-                    if (null != search && mapTeamworkKey.containsKey(search)) {
-                        String teamworkVal = "Teamwork\n";
-                        for (String emp : mapTeamworkKey.get(search)) {
-                            teamworkVal += emp + "\n";
-                        }
-                        System.out.println(teamworkVal);
-                        return teamworkVal;
+                if (null != search && mapTeamworkKey.containsKey(search)) {
+                    String teamworkVal = "\n";
+                    for (String emp : mapTeamworkKey.get(search)) {
+                        teamworkVal += emp + "\n";
                     }
-                    break;
-
+                    System.out.println(teamworkVal);
+                    return teamworkVal;
+                }
+                break;
         }
         return null;
     }
+
     public String getDegree() {
         return degree;
     }
